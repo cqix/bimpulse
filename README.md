@@ -1,2 +1,3 @@
-# bimpulse
-BIMpulse
+# BIMpulse
+
+MIT Licensed
