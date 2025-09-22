@@ -126,7 +126,61 @@ curl http://localhost:3000/download/report/{jobId} -o report.json
 ### Sicherheit
 - Keine Authentifizierung implementiert (Prototyp-Status).
 - Temp-Datein speichern temporär /temp/.
+# IFC-Normalizer
 
+Eine Webanwendung zur Normalisierung von IFC-Dateien gemäß den Standards des BIM-Portals.
+
+## Features
+
+- Moderne, benutzerfreundliche GUI
+- Drag-and-Drop IFC-Datei-Upload
+- Verarbeitung von IFC-Dateien nach BIM-Portal-Standards
+- Detaillierte Änderungsberichte
+- Download der normalisierten IFC-Datei
+
+## Installation
+
+```bash
+# Repository klonen
+git clone https://github.com/yourusername/ifc-normalizer.git
+cd ifc-normalizer
+
+# Abhängigkeiten installieren
+npm install
+
+# Umgebungsvariablen konfigurieren
+cp .env.example .env
+# Dann die Werte in .env anpassen
+
+# Anwendung starten
+npm start
+```
+
+## Verwendung
+
+1. Öffne die Anwendung im Browser unter http://localhost:3000
+2. Ziehe eine IFC-Datei auf die Oberfläche oder klicke auf "Datei auswählen"
+3. Warte, bis die Verarbeitung abgeschlossen ist
+4. Überprüfe die Änderungen im Bericht
+5. Lade die normalisierte IFC-Datei herunter
+
+## Technologien
+
+- Node.js mit Express.js
+- TypeScript
+- web-ifc für die IFC-Verarbeitung
+- Modernes UI mit CSS Flexbox/Grid
+
+## Entwicklung
+
+```bash
+# Entwicklungsmodus starten
+npm run dev
+```
+
+## Lizenz
+
+MIT
 ## 🧪 Testen & Entwicklung
 
 ### Local Testing
