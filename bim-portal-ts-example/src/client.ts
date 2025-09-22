@@ -100,7 +100,7 @@ export class BIMPortalClient {
   }
 
   /** Search public properties */
-  searchProperties(params: FormData) {
+  searchProperties(params: string) {
     return this.request<any>('/merkmale/api/v1/public/property', {}, {
       method: 'POST',
       body: params
