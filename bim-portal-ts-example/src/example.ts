@@ -8,6 +8,8 @@ import { BIMPortalClient } from './client.js';
  * - Gets organisation filter
  * - Searches property groups & properties
  * - Fetches details for first hit in each list (if available)
+ * 
+ * @returns Eine Promise, die nach Abschluss aller Beispieloperationen aufgelöst wird
  */
 async function main() {
   const client = new BIMPortalClient();

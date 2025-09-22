@@ -24,7 +24,14 @@ export class BIMPortalClient {
     this.userAgent = opts.userAgent ?? 'bim-portal-ts-example/1.0 (+https://github.com/pb40development/bim-portal)';
   }
 
-  /** Core request helper with basic retries */
+  /**
+   * Core request helper mit grundlegender Wiederholungsfunktionalität
+   * @param path API-Endpunktpfad
+   * @param query Optionale Abfrageparameter
+   * @param init Optionale Fetch-Initialisierungsoptionen
+   * @param retries Anzahl der Wiederholungsversuche bei Fehlern
+   * @returns Verarbeitete API-Antwort
+   */
   private async request<T>(path: string, query?: Query, init?: RequestInit, retries = 2): Promise<T> {
     const url = new URL(this.baseUrl + path);
 
@@ -81,25 +88,40 @@ export class BIMPortalClient {
 
   // --- Endpoints (based on official Swagger + community notes) ---
 
-  /** Organisations available via REST API */
+  /**
+   * Listet alle über die REST-API verfügbaren Organisationen auf
+   * @returns Ein Array aller verfügbaren Organisationen
+   */
   listOrganisations() {
     // GET /infrastruktur/api/v1/public/organisation
     return this.request<any[]>('/infrastruktur/api/v1/public/organisation');
   }
 
-  /** Search public property groups */
+  /**
+   * Durchsucht öffentliche Eigenschaftsgruppen (Merkmalsgruppen)
+   * @param params Suchparameter und Filter für die Abfrage
+   * @returns Suchergebnisse mit Eigenschaftsgruppen
+   */
   searchPropertyGroups(params: Query) {
     // GET /merkmale/api/v1/propertygroup/public
     return this.request<any>('/merkmale/api/v1/propertygroup/public', params);
   }
 
-  /** Fetch a single property group by GUID */
+  /**
+   * Ruft eine einzelne Eigenschaftsgruppe anhand ihrer GUID ab
+   * @param guid Die eindeutige GUID der abzurufenden Eigenschaftsgruppe
+   * @returns Die angeforderte Eigenschaftsgruppe
+   */
   getPropertyGroupByGuid(guid: string) {
     // GET /merkmale/api/v1/propertygroup/{guid}
     return this.request<any>(`/merkmale/api/v1/propertygroup/${encodeURIComponent(guid)}`);
   }
 
-  /** Search public properties */
+  /**
+   * Durchsucht öffentliche Eigenschaften (Merkmale)
+   * @param params JSON-String mit Suchparametern und Filtern
+   * @returns Suchergebnisse mit Eigenschaften
+   */
   searchProperties(params: string) {
     return this.request<any>('/merkmale/api/v1/public/property', {}, {
       method: 'POST',
@@ -107,18 +129,32 @@ export class BIMPortalClient {
     });
   }
 
-  /** Fetch a single property by GUID */
+  /**
+   * Ruft eine einzelne Eigenschaft anhand ihrer GUID ab
+   * @param guid Die eindeutige GUID der abzurufenden Eigenschaft
+   * @returns Die angeforderte Eigenschaft
+   */
   getPropertyByGuid(guid: string) {
     // GET /merkmale/api/v1/property/{guid}
     return this.request<any>(`/merkmale/api/v1/property/${encodeURIComponent(guid)}`);
   }
 
+      /**
+       * Sucht nach AIA-Projekten basierend auf den übergebenen Parametern
+       * @param params Abfrageparameter für die Projektsuche
+       * @returns Liste der gefundenen Projekte
+       */
   async searchProjects(params: Query) {
     return this.request<any>('/aia/api/v1/public/aiaProject', params, {
       method: 'POST',
     });
   }
 
+      /**
+       * Ruft ein einzelnes AIA-Projekt anhand seiner GUID ab
+       * @param guid Die eindeutige GUID des abzurufenden Projekts
+       * @returns Das angeforderte Projekt
+       */
   getProjectByGuid(guid: string) {
     // GET /aia/api/v1/public/aiaProject/{guid}
     return this.request<any>(`/aia/api/v1/public/aiaProject/${encodeURIComponent(guid)}`);
