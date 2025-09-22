@@ -17,46 +17,59 @@ async function main() {
 
   // 1) Organisations
   const organisations = await client.listOrganisations();
-  console.log(`\nOrganisations: ${Array.isArray(organisations) ? organisations.length : 'n/a'}`);
-  console.log((organisations ?? []).slice(0, 5));
+  // console.log(`\nOrganisations: ${Array.isArray(organisations) ? organisations.length : 'n/a'}`);
+  // console.log((organisations ?? []).slice(0, 500));
 
-  // 2) Organisation filter used by the Merkmale UI
-  const orgFilter = await client.getOrganisationFilter();
-  console.log(`\nOrganisation filter entries: ${Array.isArray(orgFilter) ? orgFilter.length : 'n/a'}`);
-  const firstOrgId = Array.isArray(orgFilter) && orgFilter.length ? (orgFilter[0]?.id ?? orgFilter[0]?.value ?? orgFilter[0]) : undefined;
+  // Get AIA-Beispiel Bundesbauten
+  const term = 'AIA-Beispiel Bundesbauten'.toLowerCase();
 
-  // Common params (adjust as needed based on your data)
-  const params = {
-    page: 0,
-    size: 10,
-    search: 'Tür', // try a German term commonly found in properties
-    ...(firstOrgId ? { organisationIds: [firstOrgId] } : {})
-  };
+  const matches = (organisations ?? []).filter(org => {
+    const name =
+        String(org?.name ?? org?.displayName ?? org?.title ?? org?.label ?? '');
+    return name.toLowerCase().includes(term);
+  });
 
-  // 3) Property groups
-  const pg = await client.searchPropertyGroups(params);
-  console.log('\nProperty groups (first page):');
-  console.log(pg);
+  let firstOrgId;
+  if (matches.length > 0) {
+    // Alle passenden Namen
+    const names = matches.map(o => o.name ?? o.displayName ?? o.title ?? o.label);
+    console.log('Gefundene Namen:', names);
 
-  // If the payload includes an array of items, try to pick a guid/id
-  const firstPgGuid = pg?.content?.[0]?.guid ?? pg?.items?.[0]?.guid ?? pg?.[0]?.guid ?? undefined;
-  if (firstPgGuid) {
-    const detail = await client.getPropertyGroupByGuid(firstPgGuid);
-    console.log(`\nProperty group detail (${firstPgGuid}):`);
-    console.dir(detail, { depth: 3 });
+    // Optional: erster Treffer mit ID/Guid
+    const first = matches[0];
+    console.log('Erster Treffer:', {
+      id: first.id ?? first.guid ?? first.uuid ?? first.organisationId ?? '<ID_PLACEHOLDER>',
+      name: first.name ?? first.displayName ?? first.title ?? first.label
+    });
+    firstOrgId = first.id ?? first.guid ?? first.uuid ?? first.organisationId ?? undefined;
+  } else {
+    console.log('Kein Treffer für "AIA-Beispiel Bundesbauten".');
+    return;
   }
 
-  // 4) Properties
-  const props = await client.searchProperties(params);
-  console.log('\nProperties (first page):');
-  console.log(props);
+  // 4) AIA: Projects
+  // console.log('\n[AIA] Listing projects...');
+  // const params = { organisationGuids: [firstOrgId] };
+  // try {
+  //   const projects = await client.searchProjects(params);
+  //   console.log(`[AIA] Found ${projects.length} projects (showing up to 5):`);
+  //   console.log(projects.slice(0, 5));
+  // } catch (e) {
+  //   console.error('[AIA] ERROR while listing projects:', e);
+  // }
 
-  const firstPropGuid = props?.content?.[0]?.guid ?? props?.items?.[0]?.guid ?? props?.[0]?.guid ?? undefined;
-  if (firstPropGuid) {
-    const propDetail = await client.getPropertyByGuid(firstPropGuid);
-    console.log(`\nProperty detail (${firstPropGuid}):`);
-    console.dir(propDetail, { depth: 3 });
+
+  const formData = new FormData();
+  formData.append('searchString', "Ableiter");
+  try {
+    const properties = await client.searchProperties(formData);
+    console.log(`[AIA] Found ${properties.length} properties (showing up to 5):`);
+    console.log(properties.slice(0, 5));
+  } catch (e) {
+    console.error('[AIA] ERROR while listing properties:', e);
   }
+
+
 
   console.log('\nDone.');
 }

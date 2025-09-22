@@ -9,21 +9,23 @@
     "start": "node dist/example.js",
     "dev": "tsx watch src/example.ts",
     "example": "tsx src/example.ts",
+    "ifc_example": "tsx src/ifc_example.ts",
     "lint": "eslint ."
   },
   "engines": {
     "node": ">=20"
   },
   "dependencies": {
-    "dotenv": "^16.4.5"
+    "dotenv": "^16.4.5",
+    "web-ifc": "^0.0.71"
   },
   "devDependencies": {
+    "@eslint/js": "^9.11.1",
     "@types/node": "^22.7.5",
+    "eslint": "^9.11.1",
     "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
     "typescript": "^5.6.3",
-    "eslint": "^9.11.1",
-    "@eslint/js": "^9.11.1",
     "typescript-eslint": "^8.8.1"
   }
 }

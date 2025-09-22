@@ -87,12 +87,6 @@ export class BIMPortalClient {
     return this.request<any[]>('/infrastruktur/api/v1/public/organisation');
   }
 
-  /** Organisation filter as used in the Merkmale UI */
-  getOrganisationFilter() {
-    // GET /merkmale/api/v1/propertygroup/organisation-filter
-    return this.request<any[]>('/merkmale/api/v1/propertygroup/organisation-filter');
-  }
-
   /** Search public property groups */
   searchPropertyGroups(params: Query) {
     // GET /merkmale/api/v1/propertygroup/public
@@ -106,14 +100,27 @@ export class BIMPortalClient {
   }
 
   /** Search public properties */
-  searchProperties(params: Query) {
-    // GET /merkmale/api/v1/property/public
-    return this.request<any>('/merkmale/api/v1/property/public', params);
+  searchProperties(params: FormData) {
+    return this.request<any>('/merkmale/api/v1/public/property', {}, {
+      method: 'POST',
+      body: params
+    });
   }
 
   /** Fetch a single property by GUID */
   getPropertyByGuid(guid: string) {
     // GET /merkmale/api/v1/property/{guid}
     return this.request<any>(`/merkmale/api/v1/property/${encodeURIComponent(guid)}`);
+  }
+
+  async searchProjects(params: Query) {
+    return this.request<any>('/aia/api/v1/public/aiaProject', params, {
+      method: 'POST',
+    });
+  }
+
+  getProjectByGuid(guid: string) {
+    // GET /aia/api/v1/public/aiaProject/{guid}
+    return this.request<any>(`/aia/api/v1/public/aiaProject/${encodeURIComponent(guid)}`);
   }
 }
