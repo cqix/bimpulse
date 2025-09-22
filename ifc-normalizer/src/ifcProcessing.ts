@@ -55,15 +55,15 @@ export async function processIFC(buffer: Uint8Array, client: BIMPortalClient): P
     }
   };
 
-  const resolveProperty = async (name: string): Promise<any | null> => {
+  const resolveProperty = async (client: BIMPortalClient, name: string): Promise<any | null> => {
     // For demo, use mock data instead of API call
     // To enable real API, remove and use original code
-    // const search = await client.searchProperties({ searchString: name, includeDeprecated: false });
-    // const candidates = search.results || [];
-    // if (candidates.length === 0) return null;
-    // const guid = candidates[0].guid;
-    // return await client.getPropertyByGuid(guid);
-    return mockPropertyDefs[name] || null;
+    const search = await client.searchProperties({ searchString: name, includeDeprecated: false });
+    const candidates = search.results || [];
+    if (candidates.length === 0) return null;
+    const guid = candidates[0].guid;
+    return await client.getPropertyByGuid(guid);
+    // return mockPropertyDefs[name] || null;
   };
 
   const collectPropertySetsOfElement = (modelId: number, element: any): any[] => {
