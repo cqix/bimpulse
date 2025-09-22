@@ -1,7 +1,16 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { IfcAPI, IFCMATERIAL } from 'web-ifc';
+import { IfcAPI, IFCWALL } from 'web-ifc';
 
+    /**
+     * Hauptfunktion für das IFC-Beispiel
+     * - Lädt eine IFC-Datei
+     * - Initialisiert die IFC-API
+     * - Extrahiert IFCWALL-Elemente aus dem Modell
+     * - Gibt Wände-Informationen aus
+     * 
+     * @returns Eine Promise, die nach Abschluss aller IFC-Operationen aufgelöst wird
+     */
 async function main() {
 
     const ifcPath = path.resolve('../test.ifc');
@@ -16,16 +25,18 @@ async function main() {
     const modelID = ifc.OpenModel(ifcData);
 
     // Option A (works on all recent versions): get IDs, then read each line
-    const ids = ifc.GetLineIDsWithType(modelID, IFCMATERIAL);
-    const materials = [];
+    const ids = ifc.GetLineIDsWithType(modelID, IFCWALL);
+    const walls = [];
     for (let i = 0; i < ids.size(); i++) {
         const expressID = ids.get(i);
         const mat = ifc.GetLine(modelID, expressID);
-        materials.push(mat);
+        walls.push(mat);
     }
 
-    console.log('IFCMATERIAL count:', materials.length);
-    console.log(materials);
+
+
+    console.log('IFCWALL count:', walls.length);
+    console.log(walls);
 
     // When done
     ifc.CloseModel(modelID);
