@@ -1,0 +1,29 @@
+{
+  "name": "bim-portal-ts-example",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "TypeScript example client for BIM-Portal REST API (Merkmale & Merkmalsgruppen) using modern Node 20+ fetch.",
+  "scripts": {
+    "build": "tsc -p .",
+    "start": "node dist/example.js",
+    "dev": "tsx watch src/example.ts",
+    "example": "tsx src/example.ts",
+    "lint": "eslint ."
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.5",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "eslint": "^9.11.1",
+    "@eslint/js": "^9.11.1",
+    "typescript-eslint": "^8.8.1"
+  }
+}
