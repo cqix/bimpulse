@@ -4,24 +4,47 @@
   "description": "BIM IFC Normalizer SaaS - Express server for IFC upload and normalization",
   "main": "src/server.ts",
   "type": "module",
+  "bin": {
+    "ifc-normalizer": "dist/cli.js"
+  },
   "scripts": {
     "start": "tsx src/server.ts",
     "dev": "tsx watch src/server.ts",
+    "cli": "tsx src/cli.ts",
     "build": "tsc",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build:cli": "tsc && chmod +x dist/cli.js",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "npm run build"
   },
   "dependencies": {
+    "@types/node-fetch": "^2.6.13",
+    "commander": "^11.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "express": "^4.18.2",
     "multer": "^1.4.5-lts.1",
-    "web-ifc": "^0.0.71",
-    "dotenv": "^16.4.5",
-    "cors": "^2.8.5"
+    "node-fetch": "^3.3.2",
+    "web-ifc": "^0.0.71"
   },
   "devDependencies": {
+    "@eslint/js": "^9.11.1",
     "@types/express": "^4.17.21",
     "@types/multer": "^1.4.11",
     "@types/node": "^22.7.5",
+    "eslint": "^9.11.1",
+    "ts-node": "^10.9.2",
     "tsx": "^4.19.2",
-    "typescript": "^5.6.3"
-  }
+    "typescript": "^5.6.3",
+    "typescript-eslint": "^8.8.1"
+  },
+  "keywords": [
+    "ifc",
+    "bim",
+    "normalizer",
+    "api",
+    "cli",
+    "building-information-modeling"
+  ],
+  "author": "",
+  "license": "ISC"
 }

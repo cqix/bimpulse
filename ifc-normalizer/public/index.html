@@ -3,109 +3,256 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>IFC-Normalizer</title>
-  <link rel="stylesheet" href="/styles.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <title>IFC Normalizer</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .container {
+      background-color: #f5f5f5;
+      border-radius: 8px;
+      padding: 20px;
+      margin-top: 20px;
+    }
+    h1 {
+      color: #333;
+      border-bottom: 2px solid #ddd;
+      padding-bottom: 10px;
+    }
+    button, .file-input {
+      background-color: #0078d4;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      margin-top: 10px;
+    }
+    button:hover, .file-input:hover {
+      background-color: #005a9e;
+    }
+    .status {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 4px;
+      display: none;
+    }
+    .status.processing {
+      background-color: #fff4cc;
+      border: 1px solid #ffe066;
+      display: block;
+    }
+    .status.completed {
+      background-color: #d4edda;
+      border: 1px solid #c3e6cb;
+      display: block;
+    }
+    .status.error {
+      background-color: #f8d7da;
+      border: 1px solid #f5c6cb;
+      display: block;
+    }
+    #dropZone {
+      border: 2px dashed #ccc;
+      border-radius: 8px;
+      padding: 40px;
+      text-align: center;
+      margin: 20px 0;
+    }
+    #dropZone.active {
+      border-color: #0078d4;
+      background-color: #f0f7fd;
+    }
+    .api-info {
+      background-color: #e9ecef;
+      padding: 15px;
+      border-radius: 4px;
+      margin-top: 30px;
+    }
+    code {
+      background-color: #f8f9fa;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-family: monospace;
+    }
+  </style>
 </head>
 <body>
-  <div class="app-container">
-    <header class="app-header">
-      <div class="logo">
-        <i class="fa-solid fa-cube"></i>
-        <h1>IFC-Normalizer <em>by BIMpulse</em></h1>
-      </div>
-      <div class="header-actions">
-        <a href="https://github.com/yourusername/ifc-normalizer" target="_blank" class="btn btn-icon">
-          <i class="fa-brands fa-github"></i>
-        </a>
-      </div>
-    </header>
+  <h1>IFC Normalizer</h1>
 
-    <main class="app-main">
-      <div class="app-card" id="upload-area">
-        <div class="upload-container" id="dropZone">
-          <i class="fa-solid fa-file-arrow-up"></i>
-          <h2>IFC-Datei hochladen</h2>
-          <p>Ziehe deine IFC-Datei hierhin oder klicke zum Auswählen</p>
-          <input type="file" id="fileInput" accept=".ifc" hidden>
-          <button class="btn btn-primary" id="selectFileBtn">Datei auswählen</button>
-        </div>
-      </div>
-
-      <div class="app-card" id="processing-area" style="display: none;">
-        <div class="processing-status">
-          <div class="loader"></div>
-          <h2>Verarbeitung läuft</h2>
-          <p>Deine IFC-Datei wird normalisiert...</p>
-        </div>
-      </div>
-
-      <div class="app-card" id="results-area" style="display: none;">
-        <div class="results-header">
-          <h2>Verarbeitung abgeschlossen</h2>
-          <span class="badge" id="wallsCount">0 Wände</span>
-        </div>
-
-        <div class="results-info">
-          <div class="info-panel">
-            <h3>Änderungen</h3>
-            <div class="changes-summary">
-              <div class="change-stat">
-                <div class="stat-label">Eigenschaften überprüft</div>
-                <div class="stat-value" id="propsChecked">0</div>
-              </div>
-              <div class="change-stat">
-                <div class="stat-label">Eigenschaften geändert</div>
-                <div class="stat-value" id="propsChanged">0</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="results-table-container">
-          <table class="results-table">
-            <thead>
-              <tr>
-                <th>Element-ID</th>
-                <th>Eigenschaft</th>
-                <th>Alter Wert</th>
-                <th>Neuer Wert</th>
-                <th>Quelle</th>
-              </tr>
-            </thead>
-            <tbody id="changelogTable">
-              <!-- Änderungen werden hier eingefügt -->
-            </tbody>
-          </table>
-        </div>
-
-        <div class="results-actions">
-          <button class="btn btn-secondary" id="downloadReportBtn">
-            <i class="fa-solid fa-file-export"></i> Bericht herunterladen
-          </button>
-          <button class="btn btn-primary" id="downloadIfcBtn">
-            <i class="fa-solid fa-download"></i> Normalisierte IFC herunterladen
-          </button>
-        </div>
-      </div>
-    </main>
-
-    <footer class="app-footer">
-      <p>© 2025 IFC-Normalizer | <a href="#">Datenschutz</a> | <a href="#">Impressum</a></p>
-    </footer>
-  </div>
-
-  <div id="toast" class="toast" style="display: none;">
-    <div class="toast-content">
-      <i class="toast-icon"></i>
-      <span class="toast-message"></span>
+  <div class="container">
+    <h2>IFC-Datei hochladen</h2>
+    <div id="dropZone">
+      <p>IFC-Datei hier hineinziehen oder</p>
+      <input type="file" id="fileInput" accept=".ifc" />
     </div>
-    <button class="toast-close">×</button>
+    <button id="uploadBtn" disabled>Hochladen und Normalisieren</button>
+
+    <div id="status" class="status">
+      <h3 id="statusTitle">Status</h3>
+      <p id="statusMessage"></p>
+      <div id="downloadLinks" style="display: none;">
+        <button id="downloadIfc">Normalisierte IFC herunterladen</button>
+        <button id="downloadReport">Bericht herunterladen</button>
+      </div>
+    </div>
   </div>
 
-  <script src="/app.js"></script>
+  <div class="api-info">
+    <h2>API-Nutzung</h2>
+    <p>Dieser Service bietet auch eine REST API für die programmgesteuerte Nutzung:</p>
+    <pre><code>POST /api/upload - IFC-Datei hochladen
+GET /api/jobs/:jobId - Job-Status abrufen
+GET /api/jobs/:jobId/ifc - Normalisierte IFC herunterladen
+GET /api/jobs/:jobId/report - Bericht herunterladen</code></pre>
+    <p>Vollständige Dokumentation unter <a href="/api">/api</a></p>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileInput');
+    const uploadBtn = document.getElementById('uploadBtn');
+    const dropZone = document.getElementById('dropZone');
+    const status = document.getElementById('status');
+    const statusTitle = document.getElementById('statusTitle');
+    const statusMessage = document.getElementById('statusMessage');
+    const downloadLinks = document.getElementById('downloadLinks');
+    const downloadIfc = document.getElementById('downloadIfc');
+    const downloadReport = document.getElementById('downloadReport');
+
+    let currentFile = null;
+    let currentJobId = null;
+    let pollInterval = null;
+
+    // Dateiauswahl aktivieren
+    fileInput.addEventListener('change', (e) => {
+      if (e.target.files.length > 0) {
+        currentFile = e.target.files[0];
+        uploadBtn.disabled = false;
+        statusMessage.textContent = `Datei ausgewählt: ${currentFile.name} (${formatSize(currentFile.size)})`;
+      } else {
+        uploadBtn.disabled = true;
+        currentFile = null;
+      }
+    });
+
+    // Drag & Drop Unterstützung
+    dropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dropZone.classList.add('active');
+    });
+
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('active');
+    });
+
+    dropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dropZone.classList.remove('active');
+
+      if (e.dataTransfer.files.length > 0) {
+        fileInput.files = e.dataTransfer.files;
+        currentFile = e.dataTransfer.files[0];
+        uploadBtn.disabled = false;
+        statusMessage.textContent = `Datei ausgewählt: ${currentFile.name} (${formatSize(currentFile.size)})`;
+      }
+    });
+
+    // Upload-Button
+    uploadBtn.addEventListener('click', async () => {
+      if (!currentFile) return;
+
+      const formData = new FormData();
+      formData.append('ifcFile', currentFile);
+
+      try {
+        uploadBtn.disabled = true;
+        status.className = 'status processing';
+        statusTitle.textContent = 'Verarbeitung läuft...';
+        statusMessage.textContent = 'Die IFC-Datei wird hochgeladen und verarbeitet...';
+
+        const response = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          currentJobId = data.jobId;
+          statusMessage.textContent = `Verarbeitung gestartet. Job-ID: ${currentJobId}`;
+          startPolling(currentJobId);
+        } else {
+          status.className = 'status error';
+          statusTitle.textContent = 'Fehler';
+          statusMessage.textContent = data.error || 'Beim Hochladen ist ein Fehler aufgetreten';
+          uploadBtn.disabled = false;
+        }
+      } catch (err) {
+        status.className = 'status error';
+        statusTitle.textContent = 'Fehler';
+        statusMessage.textContent = 'Verbindungsfehler: ' + err.message;
+        uploadBtn.disabled = false;
+      }
+    });
+
+    // Job-Status abrufen
+    function startPolling(jobId) {
+      if (pollInterval) clearInterval(pollInterval);
+
+      pollInterval = setInterval(async () => {
+        try {
+          const response = await fetch(`/api/jobs/${jobId}`);
+          const data = await response.json();
+
+          if (response.ok) {
+            if (data.status === 'completed') {
+              clearInterval(pollInterval);
+              status.className = 'status completed';
+              statusTitle.textContent = 'Verarbeitung abgeschlossen';
+              statusMessage.textContent = `Analysierte Wände: ${data.numberOfWalls}`;
+              downloadLinks.style.display = 'block';
+              uploadBtn.disabled = false;
+            } else if (data.status === 'error') {
+              clearInterval(pollInterval);
+              status.className = 'status error';
+              statusTitle.textContent = 'Fehler bei der Verarbeitung';
+              statusMessage.textContent = data.error || 'Ein unbekannter Fehler ist aufgetreten';
+              uploadBtn.disabled = false;
+            }
+          } else {
+            clearInterval(pollInterval);
+            status.className = 'status error';
+            statusTitle.textContent = 'Fehler';
+            statusMessage.textContent = data.error || 'Fehler beim Abrufen des Job-Status';
+            uploadBtn.disabled = false;
+          }
+        } catch (err) {
+          // Bei temporären Netzwerkfehlern einfach weiter versuchen
+          console.error('Polling-Fehler:', err);
+        }
+      }, 2000);
+    }
+
+    // Download-Buttons
+    downloadIfc.addEventListener('click', () => {
+      if (currentJobId) window.location.href = `/api/jobs/${currentJobId}/ifc`;
+    });
+
+    downloadReport.addEventListener('click', () => {
+      if (currentJobId) window.location.href = `/api/jobs/${currentJobId}/report`;
+    });
+
+    // Hilfsfunktion für die Formatierung der Dateigröße
+    function formatSize(bytes) {
+      if (bytes < 1024) return bytes + ' Bytes';
+      if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(2) + ' KB';
+      return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+    }
+  </script>
 </body>
 </html>

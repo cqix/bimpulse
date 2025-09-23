@@ -38,7 +38,7 @@ export class BIMPortalClient {
       }
     }
 
-    const headers: HeadersInit = {
+    const headers: Record<string, string> = {
       'accept': 'application/json',
       'user-agent': this.userAgent
     };

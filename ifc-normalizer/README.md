@@ -1,5 +1,97 @@
 # BIM IFC Normalizer SaaS
+# IFC-Normalizer
 
+Ein Tool zur Normalisierung von IFC-Dateien für BIM-Projekte.
+
+## Features
+
+- Verarbeitung und Normalisierung von IFC-Dateien
+- REST API für die Integration in andere Anwendungen
+- Kommandozeilen-Interface für manuelle Verarbeitung
+- Statusverfolgung und Berichtserstellung
+
+## Installation
+
+```bash
+npm install
+```
+
+## Verwendung
+
+### Web-Server starten
+
+```bash
+npm start
+```
+
+Der Server läuft standardmäßig auf Port 3000. Dies kann über die Umgebungsvariable PORT angepasst werden.
+
+### Kommandozeilen-Tool
+
+Installation:
+
+```bash
+npm install -g .
+```
+
+Verwendung:
+
+```bash
+ifc-normalizer process path/to/file.ifc --output result.ifc --report report.json
+```
+
+Ohne Installation:
+
+```bash
+npm run cli -- process path/to/file.ifc
+```
+
+## REST API
+
+### API Übersicht
+
+- `GET /api`: API-Dokumentation
+- `POST /api/upload`: IFC-Datei hochladen und verarbeiten
+- `GET /api/jobs/:jobId`: Status eines Verarbeitungsauftrags abrufen
+- `GET /api/jobs/:jobId/ifc`: Normalisierte IFC-Datei herunterladen
+- `GET /api/jobs/:jobId/report`: Verarbeitungsbericht herunterladen
+
+### Beispiel: Datei hochladen
+
+```bash
+curl -X POST -F "ifcFile=@path/to/file.ifc" http://localhost:3000/api/upload
+```
+
+Antwort:
+```json
+{
+  "jobId": "abc123def",
+  "message": "Processing started"
+}
+```
+
+### Beispiel: Status abrufen
+
+```bash
+curl http://localhost:3000/api/jobs/abc123def
+```
+
+Antwort:
+```json
+{
+  "status": "completed",
+  "numberOfWalls": 42,
+  "createdAt": "2023-09-15T14:30:00.000Z"
+}
+```
+
+## Umgebungsvariablen
+
+Siehe `.env.example` für verfügbare Konfigurationsoptionen.
+
+## Lizenz
+
+Copyright © 2025
 Ein Cloud-basiertes SaaS-Tool zur automatischen Prüfung und Normalisierung von IFC-Modelldateien im BIM-Kontext. Basierend auf web-ifc und BIM-Portal-API für die kanonische Eigenschaftsnormierung von Bauelementen.
 
 ## 🚀 Überblick
@@ -34,7 +126,136 @@ ifc-normalizer/
 - **BIM-Portal**: REST-API für Merkmal-Suche/-Auflösung
 - **Frontend**: Vanilla JavaScript/HTML5 (kein Framework für Hackathon-Speed)
 - **Deployment**: Lokal mit tsx Hot-Reload; skalierbar auf Cloud (Heroku/Vercel/Docker)
+# IFC-Normalizer
 
+Ein Tool zur Normalisierung von IFC-Dateien gemäß BIM-Standards und -Richtlinien.
+
+## Funktionen
+
+- Analyse und Normalisierung von IFC-Dateien
+- Anpassung von IFC-Elementen entsprechend definierter Regeln
+- REST-API für die Integration in andere Anwendungen
+- Kommandozeilen-Interface für die Batch-Verarbeitung
+- Web-Interface für den interaktiven Betrieb
+
+## Installation
+
+```bash
+# Abhängigkeiten installieren
+npm install
+
+# Für die globale CLI-Nutzung
+npm install -g .
+```
+
+## Verwendung
+
+### Web-Server
+
+```bash
+# Server starten (Standard-Port 3000)
+npm start
+
+# Mit einem anderen Port
+PORT=8080 npm start
+
+# Entwicklungsmodus mit automatischem Neuladen
+npm run dev
+```
+
+### Kommandozeilen-Tool
+
+```bash
+# Mit globaler Installation
+ifc-normalizer process path/to/file.ifc --output result.ifc --report report.json
+
+# Ohne globale Installation
+npm run cli -- process path/to/file.ifc
+```
+
+Parameter:
+- `process <file>` - Pfad zur zu verarbeitenden IFC-Datei
+- `--output <path>` - Ausgabepfad für die normalisierte IFC-Datei (optional)
+- `--report <path>` - Ausgabepfad für den JSON-Bericht (optional)
+
+## REST API
+
+### Endpunkte
+
+#### Dokumentation
+```
+GET /api
+```
+Liefert eine Übersicht über alle verfügbaren API-Endpunkte.
+
+#### IFC-Datei hochladen
+```
+POST /api/upload
+Content-Type: multipart/form-data
+
+Parameter:
+- ifcFile: Die IFC-Datei (Formular-Datei-Upload)
+```
+
+Rückgabe:
+```json
+{
+  "jobId": "abc123def",
+  "message": "Processing started"
+}
+```
+
+#### Job-Status abrufen
+```
+GET /api/jobs/:jobId
+```
+
+Rückgabe:
+```json
+{
+  "status": "completed", // oder "processing", "error"
+  "numberOfWalls": 42,
+  "createdAt": "2023-09-15T14:30:00.000Z",
+  "completedAt": "2023-09-15T14:32:00.000Z",
+  "error": "Fehlermeldung (nur bei status=error)"
+}
+```
+
+#### Normalisierte IFC-Datei herunterladen
+```
+GET /api/jobs/:jobId/ifc
+```
+
+#### Bericht herunterladen
+```
+GET /api/jobs/:jobId/report
+```
+
+### Beispiel mit curl
+
+```bash
+# IFC-Datei hochladen
+curl -X POST -F "ifcFile=@/path/to/model.ifc" http://localhost:3000/api/upload
+
+# Status abrufen
+curl http://localhost:3000/api/jobs/abc123def
+
+# Ergebnisse herunterladen
+curl -o normalized.ifc http://localhost:3000/api/jobs/abc123def/ifc
+curl -o report.json http://localhost:3000/api/jobs/abc123def/report
+```
+
+## Umgebungsvariablen
+
+Die folgenden Umgebungsvariablen können in einer `.env`-Datei oder direkt in der Umgebung gesetzt werden:
+
+- `PORT` - Server-Port (Standard: 3000)
+- `BIM_PORTAL_BASE` - Basis-URL für den BIM-Portal-API-Zugriff
+- `BIM_PORTAL_TOKEN` - Zugriffstoken für den BIM-Portal-API-Zugriff
+
+## Lizenz
+
+Copyright © 2025
 ## 🛠️ Setup & Installation
 
 ### Voraussetzungen
