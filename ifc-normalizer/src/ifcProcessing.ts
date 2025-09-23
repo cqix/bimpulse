@@ -34,26 +34,6 @@ export async function processIFC(buffer: Uint8Array, client: BIMPortalClient): P
   const getAllOfType = (id: number, type: any): Int32Array => (ifcApi as any).GetLineIDsWithType(id, type);
   const getLine = (id: number, expressID: number): any => (ifcApi as any).GetLine(id, expressID);
 
-  const mockPropertyDefs: Record<string, any> = {
-    'FireRating': {
-      guid: 'mock-fire-guid',
-      versionNumber: '1.0',
-      dataType: 'STRING',
-      units: null
-    },
-    'ThermalTransmittance': {
-      guid: 'mock-thermal-guid',
-      versionNumber: '1.1',
-      dataType: 'NUMBER',
-      units: 'W/m²K'
-    },
-    'IsExternal': {
-      guid: 'mock-external-guid',
-      versionNumber: '1.2',
-      dataType: 'BOOLEAN',
-      units: null
-    }
-  };
 
   const resolveProperty = async (client: BIMPortalClient, name: string): Promise<any | null> => {
     // For demo, use mock data instead of API call
@@ -63,7 +43,6 @@ export async function processIFC(buffer: Uint8Array, client: BIMPortalClient): P
     if (candidates.length === 0) return null;
     const guid = candidates[0].guid;
     return await client.getPropertyByGuid(guid);
-    // return mockPropertyDefs[name] || null;
   };
 
   const collectPropertySetsOfElement = (modelId: number, element: any): any[] => {
@@ -86,6 +65,123 @@ export async function processIFC(buffer: Uint8Array, client: BIMPortalClient): P
   const getPropByName = (pset: any, propName: string): any => {
     const has = (pset.HasProperties || []).map((p: any) => typeof p === 'number' ? getLine(modelID, p) : p);
     return has.find((p: any) => (p.Name?.value || '').toLowerCase() === propName.toLowerCase());
+  };
+
+
+// AI: Property-Synonym-Erkennung
+// Ersetzt die einfache Namenssuche durch eine erweiterte Suche mit Synonymen, Normalisierung und Varianten
+  const normalizePropName = (s: string): string => {
+    return (s || '')
+        .normalize('NFKD')
+        .replace(/[\u0300-\u036f]/g, '') // Diakritika entfernen
+        .replace(/[_\-]+/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .toLowerCase();
+  };
+
+  const splitCamel = (s: string): string =>
+      (s || '').replace(/([a-z])([A-Z])/g, '$1 $2');
+
+  const baseVariants = (name: string): string[] => {
+    const v = new Set<string>();
+    const raw = name || '';
+    const withSpaces = splitCamel(raw);
+    const list = [
+      raw,
+      withSpaces,
+      raw.replace(/[_\-]/g, ' '),
+      withSpaces.replace(/[_\-]/g, ' '),
+      raw.replace(/[_\-\s]/g, ''),
+      withSpaces.replace(/[_\-\s]/g, '')
+    ];
+    for (const x of list) {
+      v.add(x);
+      v.add(x.replace(/\(.*?\)/g, '').trim()); // Klammerzusätze entfernen
+      v.add(x.replace(/\[.*?\]/g, '').trim());
+    }
+    return Array.from(v).filter(Boolean);
+  };
+
+  const synonymMap: Record<string, string[]> = {
+    // DE -> EN und übliche Varianten
+    'hersteller': ['manufacturer', 'producer', 'vendor', 'lieferant'],
+    'lieferant': ['manufacturer', 'vendor'],
+    'baustoff': ['material', 'werkstoff'],
+    'werkstoff': ['material'],
+    'material': ['werkstoff', 'baustoff'],
+    'höhe': ['height', 'hoehe'],
+    'breite': ['width'],
+    'länge': ['length', 'laenge'],
+    'tiefe': ['depth'],
+    'dicke': ['thickness', 'staerke', 'stärke'],
+    'stärke': ['thickness', 'dicke', 'staerke'],
+    'gewicht': ['weight', 'masse'],
+    'masse': ['mass', 'weight'],
+    'kennnummer': ['identifier', 'id', 'code', 'nummer'],
+    'nummer': ['number', 'no', 'nr'],
+    'bezeichnung': ['designation', 'name', 'title'],
+    'name': ['designation', 'title'],
+    'fläche': ['area', 'flaeche'],
+    'volumen': ['volume'],
+    'u-wert': ['u value', 'uvalue', 'thermal transmittance'],
+    'wärmedurchgangskoeffizient': ['thermal transmittance', 'u value', 'uvalue', 'waermedurchgangskoeffizient'],
+    'brandschutzklasse': ['fire rating', 'fire resistance', 'feuerwiderstandsklasse'],
+    'feuerwiderstandsklasse': ['fire rating', 'fire resistance', 'brandschutzklasse'],
+    'firerating': ['fire rating', 'fire resistance', 'brandschutzklasse'],
+    'isexternal': ['is external', 'external', 'außen', 'aussen'],
+    'reference': ['referenz', 'kennung'],
+    'description': ['beschreibung'],
+    'mark': ['kennung', 'label', 'tag'],
+  };
+
+  const expandSynonyms = (name: string): string[] => {
+    const candidates = new Set<string>();
+    for (const v of baseVariants(name)) {
+      candidates.add(v);
+      const norm = normalizePropName(v);
+      // Direkte Synonyme
+      if (synonymMap[norm]) {
+        for (const s of synonymMap[norm]) {
+          candidates.add(s);
+        }
+      }
+      // Bindestrich/Leerzeichen-Varianten für U-Wert etc.
+      candidates.add(v.replace(/\s*-\s*/g, '-'));
+      candidates.add(v.replace(/\s*-\s*/g, ' '));
+      candidates.add(v.replace(/\s+/g, ''));
+    }
+    return Array.from(candidates).filter(Boolean);
+  };
+
+// Liefert Property aus einem PSet, wobei mehrere Synonym-/Varianten geprüft werden
+  const getPropByNameWithSynonyms = (pset: any, propName: string): any => {
+    // 1) Direkter Treffer
+    const direct = getPropByName(pset, propName);
+    if (direct) return direct;
+
+    // 2) Variantentreffer über normalisierte Namen
+    const has = (pset.HasProperties || []).map((p: any) => typeof p === 'number' ? getLine(modelID, p) : p);
+
+    const requestedNorms = new Set(expandSynonyms(propName).map(normalizePropName));
+
+    // Exakte Normalisierungs-Gleichheit
+    for (const p of has) {
+      const n = normalizePropName(p?.Name?.value || '');
+      if (requestedNorms.has(n)) return p;
+    }
+
+    // 3) Lockerer Vergleich: startsWith/contains
+    for (const p of has) {
+      const n = normalizePropName(p?.Name?.value || '');
+      for (const r of requestedNorms) {
+        if (n.startsWith(r) || r.startsWith(n) || n.includes(r) || r.includes(n)) {
+          return p;
+        }
+      }
+    }
+
+    return null;
   };
 
   const createPropertySet = (modelId: number, name: string): any => {
@@ -115,7 +211,7 @@ export async function processIFC(buffer: Uint8Array, client: BIMPortalClient): P
   };
 
   const addOrSetSingleValue = (modelId: number, pset: any, propName: string, portalDef: any, jsValue: any): { prop: any, isNew: boolean } => {
-    const existing = getPropByName(pset, propName);
+    const existing = getPropByNameWithSynonyms(pset, propName);
     if (existing) {
       // For update, perhaps not need new, but here we skip updating for simplicity
       return { prop: existing, isNew: false };
@@ -153,20 +249,36 @@ export async function processIFC(buffer: Uint8Array, client: BIMPortalClient): P
 
     for (const prop of properties) {
       const existing = pset ? getPropByName(pset, prop.name) : null;
+
+      let portalDef = await resolveProperty(client, prop.name);
+      console.log(`Property ${prop.name} has portal def: ${portalDef}`);
+
+      if (!portalDef) {
+        // Versuche Synonyme aus dem synonymMap zu nutzen
+        const variants = expandSynonyms(prop.name);
+        for (const variant of variants) {
+          if (variant !== prop.name) { // Überspringe den ursprünglichen Namen, der bereits versucht wurde
+            console.log(` - Versuche Synonym ${variant} für Property ${prop.name}`);
+            portalDef = await resolveProperty(client, variant);
+            if (portalDef) {
+              console.log(` - Property ${prop.name} gefunden durch Synonym ${variant}`);
+              break;
+            }
+          }
+        }
+      } else {
+        continue;
+      }
+
+      // Nur Änderungen protokollieren, wenn ein Wert vorhanden ist
       const oldValue = existing ? existing.NominalValue?.value : undefined;
-
-      const portalDef = await resolveProperty(client, prop.name);
-      if (!portalDef) continue;
-
-      // For demo, always show as potential change to demonstrate functionality
-      const wouldAdd = true; // Assume defaults are set even if matching
-      if (wouldAdd) {
+      if (oldValue !== undefined) {
         log.push({
           ifcElementId: wall.expressID,
           psetName: 'Pset_WallCommon',
           propertyName: prop.name,
           oldValue,
-          newValue: prop.defaultValue,
+          newValue: oldValue, // Behalte den originalen Wert bei
           portalGuid: portalDef.guid,
           version: portalDef.versionNumber || '',
           dataType: portalDef.dataType,
