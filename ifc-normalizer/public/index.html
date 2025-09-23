@@ -68,6 +68,19 @@
       border-color: #0078d4;
       background-color: #f0f7fd;
     }
+    .process-diagram {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      border-radius: 12px;
+      padding: 5px;
+      margin: 10px 0;
+      text-align: center;
+      border: 1px solid #dee2e6;
+    }
+    .process-diagram h2 {
+      margin-bottom: 0px;
+      color: #343a40;
+      font-size: 24px;
+    }
     .api-section {
       background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
       color: white;
@@ -203,15 +216,62 @@
   </style>
 </head>
 <body>
-<h1>IFC Normalizer</h1>
+<h1>IFC Normalizer <img src="logo.png" alt="BIMpulse Logo" height="55" style="vertical-align: middle; float: right"></h1>
 
 <div class="container">
-  <h2>IFC-Datei hochladen</h2>
+  <!-- Prozessdiagramm hinzugefügt -->
+  <div class="process-diagram">
+    <svg width="100%" height="150" viewBox="0 0 800 150" xmlns="http://www.w3.org/2000/svg">
+      <!-- Schritt 1: Upload -->
+      <g>
+        <rect x="30" y="30" width="180" height="90" rx="10" fill="rgba(102, 126, 234, 0.1)" stroke="#667eea" stroke-width="2"/>
+        <circle cx="120" cy="55" r="18" fill="#667eea"/>
+        <text x="120" y="60" text-anchor="middle" fill="white" font-size="16" font-weight="bold">1</text>
+        <text x="120" y="85" text-anchor="middle" fill="#667eea" font-size="12" font-weight="bold">IFC Datei hochladen</text>
+        <text x="120" y="100" text-anchor="middle" fill="#666" font-size="10">Drag &amp; Drop oder</text>
+        <text x="120" y="112" text-anchor="middle" fill="#666" font-size="10">Datei auswählen</text>
+      </g>
+
+      <!-- Pfeil 1 -->
+      <g>
+        <path d="M 220 75 L 270 75" stroke="#667eea" stroke-width="3" fill="none"/>
+        <polygon points="265,70 275,75 265,80" fill="#667eea"/>
+      </g>
+
+      <!-- Schritt 2: Normalisierung -->
+      <g>
+        <rect x="290" y="30" width="220" height="90" rx="10" fill="rgba(118, 75, 162, 0.1)" stroke="#764ba2" stroke-width="2"/>
+        <circle cx="400" cy="55" r="18" fill="#764ba2"/>
+        <text x="400" y="60" text-anchor="middle" fill="white" font-size="16" font-weight="bold">2</text>
+        <text x="400" y="85" text-anchor="middle" fill="#764ba2" font-size="12" font-weight="bold">Normalisierung gegen</text>
+        <text x="400" y="97" text-anchor="middle" fill="#764ba2" font-size="12" font-weight="bold">BIM-Portal Properties</text>
+        <text x="400" y="112" text-anchor="middle" fill="#666" font-size="10">Standardisierung</text>
+      </g>
+
+      <!-- Pfeil 2 -->
+      <g>
+        <path d="M 520 75 L 570 75" stroke="#667eea" stroke-width="3" fill="none"/>
+        <polygon points="565,70 575,75 565,80" fill="#667eea"/>
+      </g>
+
+      <!-- Schritt 3: Bereitstellung -->
+      <g>
+        <rect x="590" y="30" width="180" height="90" rx="10" fill="rgba(118, 75, 162, 0.1)" stroke="#764ba2" stroke-width="2"/>
+        <circle cx="680" cy="55" r="18" fill="#667eea"/>
+        <text x="680" y="60" text-anchor="middle" fill="white" font-size="16" font-weight="bold">3</text>
+        <text x="680" y="85" text-anchor="middle" fill="#667eea" font-size="12" font-weight="bold">Bereitstellung zur</text>
+        <text x="680" y="97" text-anchor="middle" fill="#667eea" font-size="12" font-weight="bold">Weiterverarbeitung</text>
+        <text x="680" y="112" text-anchor="middle" fill="#666" font-size="10">Download verfügbar</text>
+      </g>
+
+    </svg>
+  </div>
   <div id="dropZone">
+    <h2>IFC-Datei hochladen</h2>
     <p>IFC-Datei hier hineinziehen oder</p>
     <input type="file" id="fileInput" accept=".ifc" />
   </div>
-  <button id="uploadBtn" disabled>Hochladen und Normalisieren</button>
+  <button id="uploadBtn" disabled>IFC-Datei Normalisieren</button>
 
   <div id="status" class="status">
     <h3 id="statusTitle">Status</h3>
