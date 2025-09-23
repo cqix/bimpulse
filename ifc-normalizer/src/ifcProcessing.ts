@@ -59,7 +59,7 @@ export async function processIFC(buffer: Uint8Array, client: BIMPortalClient): P
     // For demo, use mock data instead of API call
     // To enable real API, remove and use original code
     const search = await client.searchProperties({ searchString: name, includeDeprecated: false });
-    const candidates = search.results || [];
+    const candidates = search || [];
     if (candidates.length === 0) return null;
     const guid = candidates[0].guid;
     return await client.getPropertyByGuid(guid);
@@ -147,6 +147,7 @@ export async function processIFC(buffer: Uint8Array, client: BIMPortalClient): P
     const properties = [
       { name: 'FireRating', defaultValue: 'T30' },
       { name: 'ThermalTransmittance', defaultValue: 0.35 },
+      { name: 'Gewerk', defaultValue: false },
       { name: 'IsExternal', defaultValue: false }
     ];
 
@@ -185,6 +186,7 @@ export async function processIFC(buffer: Uint8Array, client: BIMPortalClient): P
     const id = (walls as any).get(i);
     const wall = getLine(modelID, id);
     if (wall) {
+      //console.log(`Normalizing wall ${wall.GlobalId.value}`);
       const wallLog = await normalizeWall(wall);
       totalLog = totalLog.concat(wallLog);
     }
@@ -192,6 +194,17 @@ export async function processIFC(buffer: Uint8Array, client: BIMPortalClient): P
 
   (ifcApi as any).CloseModel(modelID);
 
+  // Statistik über die überprüften Eigenschaften
+  const uniqueProperties = new Set(totalLog.map(entry => entry.propertyName));
+  //console.log(`Insgesamt wurden ${uniqueProperties.size} verschiedene Eigenschaften überprüft`);
+
   // Since no modifications were made for demo stability, return original IFC
-  return { outputIFC: buffer, report: totalLog, elementsAnalyzed: { walls: wallsCount } };
+  return { 
+    outputIFC: buffer, 
+    report: totalLog, 
+    elementsAnalyzed: { 
+      walls: wallsCount,
+      propertiesChecked: uniqueProperties.size 
+    } 
+  };
 }

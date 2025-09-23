@@ -137,3 +137,6 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+test.backup.ifc
+test_normalized.ifc
+test_report.json
